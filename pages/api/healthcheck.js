@@ -9,6 +9,9 @@ export default async function handler(req, res) {
     google_sheets: !!(config.GOOGLE_SHEET_ID && config.GOOGLE_CLIENT_EMAIL && config.GOOGLE_PRIVATE_KEY)
   };
 
+  // Вывод значения VERCEL_URL для отладки
+  const vercelUrlDisplay = config.VERCEL_URL || 'Не настроен';
+
   // Общий статус - все проверки должны быть true
   const allConfigured = Object.values(checks).every(Boolean);
 
@@ -22,7 +25,7 @@ export default async function handler(req, res) {
       const status = value 
         ? '<span style="color:green">✓</span>' 
         : '<span style="color:red">✗</span>';
-      return `<li>${status} ${key}</li>`;
+      return `<li>${status} ${key}${key === 'vercel_url' ? `: ${vercelUrlDisplay}` : ''}</li>`;
     }).join('');
 
     const html = `
@@ -37,6 +40,9 @@ export default async function handler(req, res) {
           ul { list-style-type: none; padding: 0; }
           li { margin: 10px 0; }
           .footer { margin-top: 40px; font-size: 12px; color: #666; }
+          .action-button { display: inline-block; background: #0088cc; color: white; text-decoration: none; padding: 8px 12px; border-radius: 4px; margin: 5px 0; font-weight: bold; }
+          .action-section { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-top: 20px; }
+          .warning { color: red; font-weight: bold; }
         </style>
       </head>
       <body>
@@ -45,11 +51,24 @@ export default async function handler(req, res) {
         <h2>Общий статус: ${htmlStatus}</h2>
         <h3>Проверки конфигурации:</h3>
         <ul>${htmlChecks}</ul>
+        
+        <div class="action-section">
+          <h3>Действия для устранения проблем</h3>
+          <p><span class="warning">Внимание!</span> Не забудьте заменить YOUR_SECRET на ваш секретный ключ.</p>
+          
+          <p><a class="action-button" href="/api/resetWebhook?secret=YOUR_SECRET" target="_blank">Сбросить и переустановить вебхук</a></p>
+          <p>Полностью удаляет старый вебхук, очищает очередь обновлений и устанавливает новый вебхук.</p>
+          
+          <p><a class="action-button" href="/api/setupWebhook?secret=YOUR_SECRET" target="_blank">Настроить вебхук</a></p>
+          <p>Обновляет настройки вебхука без сброса очереди.</p>
+          
+          <p><a class="action-button" href="/api/debugWebhook?secret=YOUR_SECRET" target="_blank">Проверить настройки вебхука</a></p>
+          <p>Показывает текущие настройки вебхука и отправляет тестовое сообщение администратору.</p>
+        </div>
+        
         <div class="footer">
-          <p>Для настройки вебхука, перейдите по ссылке:<br>
-          <code>/api/setupWebhook?secret=YOUR_SECRET</code></p>
-          <p>Для проверки настроек вебхука, перейдите по ссылке:<br>
-          <code>/api/debugWebhook?secret=YOUR_SECRET</code></p>
+          <p>Для использования этих функций замените YOUR_SECRET на значение переменной WEBHOOK_SETUP_SECRET из настроек окружения.</p>
+          <p>Версия приложения: 1.0.1</p>
         </div>
       </body>
     </html>
@@ -64,6 +83,7 @@ export default async function handler(req, res) {
   res.status(allConfigured ? 200 : 500).json({
     ok: allConfigured,
     checks,
+    vercel_url: vercelUrlDisplay,
     timestamp: new Date().toISOString()
   });
 } 
