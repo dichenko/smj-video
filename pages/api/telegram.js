@@ -1,5 +1,5 @@
-const { bot } = require('../../lib/telegramBot');
-const config = require('../../lib/config');
+import { bot, startBot } from '../../lib/telegramBot';
+import config from '../../lib/config';
 
 export default async function handler(req, res) {
   try {
@@ -20,7 +20,6 @@ export default async function handler(req, res) {
 
 // Запускаем бота в режиме разработки с polling, в production - с вебхуком
 if (process.env.NODE_ENV !== 'production') {
-  const { startBot } = require('../../lib/telegramBot');
   if (config.TELEGRAM_BOT_TOKEN) {
     startBot();
   }

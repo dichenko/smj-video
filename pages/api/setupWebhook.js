@@ -1,5 +1,5 @@
-const { Telegraf } = require('telegraf');
-const config = require('../../lib/config');
+import { Telegraf } from 'telegraf';
+import config from '../../lib/config';
 
 export default async function handler(req, res) {
   try {
