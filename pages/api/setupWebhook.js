@@ -17,7 +17,17 @@ export default async function handler(req, res) {
     }
 
     // Получаем базовый URL для вебхука
-    const webhookUrl = `${config.VERCEL_URL}/api/telegram`;
+    let webhookUrl = config.VERCEL_URL;
+    
+    // Проверяем, есть ли протокол в URL
+    if (!webhookUrl.startsWith('http')) {
+      webhookUrl = `https://${webhookUrl}`;
+    }
+    
+    // Добавляем путь API
+    webhookUrl = `${webhookUrl}/api/telegram`;
+    
+    console.log(`Устанавливаем вебхук на URL: ${webhookUrl}`);
 
     // Создаем экземпляр бота
     const bot = new Telegraf(config.TELEGRAM_BOT_TOKEN);
@@ -34,7 +44,8 @@ export default async function handler(req, res) {
     res.status(200).json({
       ok: true,
       message: 'Webhook setup completed',
-      webhook: webhookInfo
+      webhook: webhookInfo,
+      url_used: webhookUrl
     });
   } catch (error) {
     console.error('Ошибка при установке вебхука:', error);
