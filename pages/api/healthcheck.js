@@ -33,6 +33,7 @@ export default async function handler(req, res) {
     <html>
       <head>
         <title>Статус SMJ Video Bot</title>
+        <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; line-height: 1.6; }
@@ -64,6 +65,9 @@ export default async function handler(req, res) {
           
           <p><a class="action-button" href="/api/debugWebhook?secret=YOUR_SECRET" target="_blank">Проверить настройки вебхука</a></p>
           <p>Показывает текущие настройки вебхука и отправляет тестовое сообщение администратору.</p>
+          
+          <p><a class="action-button" href="/api/diagnostics?secret=YOUR_SECRET" target="_blank">Запустить полную диагностику</a></p>
+          <p>Собирает информацию о системе, проверяет кодировку и соединение с Telegram API.</p>
         </div>
         
         <div class="footer">

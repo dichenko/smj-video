@@ -16,57 +16,48 @@ export default async function handler(req, res) {
       return;
     }
 
+    console.log('Получаем информацию о вебхуке');
+    
     // Создаем экземпляр бота
     const bot = new Telegraf(config.TELEGRAM_BOT_TOKEN);
 
     // Получаем информацию о вебхуке
     const webhookInfo = await bot.telegram.getWebhookInfo();
+    console.log('Получена информация о вебхуке:', webhookInfo);
 
     // Получаем информацию о боте
     const botInfo = await bot.telegram.getMe();
+    console.log('Получена информация о боте:', botInfo);
 
-    // Тестируем отправку сообщения администратору
+    // Отправляем тестовое сообщение администратору
     let adminMessageResult = null;
     if (config.ADMIN_TELEGRAM_ID) {
       try {
+        console.log('Отправляем тестовое сообщение администратору');
         const message = await bot.telegram.sendMessage(
           config.ADMIN_TELEGRAM_ID,
-          'Это тестовое сообщение для проверки работы бота. Если вы его видите, значит бот может отправлять сообщения.'
+          `Проверка настроек вебхука в ${new Date().toLocaleString('ru-RU')}\n` +
+          `URL вебхука: ${webhookInfo.url}\n` +
+          `Ожидающих обновлений: ${webhookInfo.pending_update_count}\n` +
+          `Последняя ошибка: ${webhookInfo.last_error_message || 'нет'}`
         );
         adminMessageResult = { success: true, message_id: message.message_id };
+        console.log('Тестовое сообщение отправлено');
       } catch (error) {
+        console.error('Ошибка при отправке сообщения администратору:', error);
         adminMessageResult = { 
           success: false, 
-          error: error.message,
-          description: 'Бот не может отправить сообщение администратору. Возможно, администратор не отправлял сообщения боту ранее.'
+          error: error.message
         };
       }
-    } else {
-      adminMessageResult = {
-        success: false,
-        error: 'ADMIN_TELEGRAM_ID not configured'
-      };
     }
 
     res.status(200).json({
       ok: true,
-      message: 'Debug info retrieved',
-      env: {
-        NODE_ENV: process.env.NODE_ENV,
-        VERCEL_URL: config.VERCEL_URL,
-        ADMIN_ID_CONFIGURED: !!config.ADMIN_TELEGRAM_ID,
-        GOOGLE_SHEETS_CONFIGURED: !!(config.GOOGLE_SHEET_ID && config.GOOGLE_CLIENT_EMAIL && config.GOOGLE_PRIVATE_KEY)
-      },
-      bot: {
-        id: botInfo.id,
-        username: botInfo.username,
-        first_name: botInfo.first_name,
-        can_join_groups: botInfo.can_join_groups,
-        can_read_all_group_messages: botInfo.can_read_all_group_messages,
-        supports_inline_queries: botInfo.supports_inline_queries
-      },
+      message: 'Webhook info retrieved',
       webhook: webhookInfo,
-      admin_message_test: adminMessageResult
+      bot: botInfo,
+      admin_message: adminMessageResult
     });
   } catch (error) {
     console.error('Ошибка при получении информации о вебхуке:', error);
