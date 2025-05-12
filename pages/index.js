@@ -30,7 +30,7 @@ export default function Home() {
 
         <div style={{ marginBottom: '2rem' }}>
           <a
-            href="https://t.me/your_bot_username"
+            href="https://t.me/smj_video_bot"
             target="_blank"
             rel="noopener noreferrer"
             style={{
